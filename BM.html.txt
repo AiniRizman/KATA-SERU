@@ -1,0 +1,779 @@
+```html
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengembaraan Kata Seru Tahun 1</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Kids / Comic Style -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Mali:wght@600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti Library for Victory Celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        jungle: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            700: '#15803d',
+                            900: '#14532d',
+                        },
+                        wood: {
+                            light: '#f5d089',
+                            DEFAULT: '#c68642',
+                            dark: '#8b5a2b',
+                            border: '#5c3a17'
+                        }
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        mali: ['Mali', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #1e5128 0%, #0e2f16 100%);
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .wood-panel {
+            background: linear-gradient(180deg, #dfa251 0%, #ba762d 100%);
+            border: 5px solid #5c3a17;
+            box-shadow: inset 0 3px 0 rgba(255,255,255,0.4), 0 8px 15px rgba(0,0,0,0.4);
+            border-radius: 1.25rem;
+        }
+
+        .wood-panel-inner {
+            background: #fff8e7;
+            border: 3px solid #8b5a2b;
+            border-radius: 0.8rem;
+        }
+
+        .wood-btn {
+            background: linear-gradient(180deg, #ffbc42 0%, #d87d12 100%);
+            border: 4px solid #5c3a17;
+            box-shadow: 0 6px 0 #3d240d, 0 10px 10px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 0px #5c3a17;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .wood-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #3d240d, 0 12px 12px rgba(0,0,0,0.3);
+        }
+
+        .wood-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #3d240d, 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .wood-btn-selected {
+            background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%) !important;
+            border-color: #14532d !important;
+            box-shadow: 0 6px 0 #052e16 !important;
+            color: #ffffff !important;
+        }
+
+        .pulse-subtle {
+            animation: pulse-animation 2s infinite;
+        }
+
+        @keyframes pulse-animation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-2 md:p-4 text-slate-800">
+
+    <div id="app" class="w-full max-w-2xl bg-emerald-950/95 rounded-3xl border-4 border-emerald-600 shadow-2xl overflow-hidden relative min-h-[660px] flex flex-col justify-between">
+        
+        <!-- Top Navigation Bar -->
+        <header id="game-header" class="bg-gradient-to-r from-amber-800 via-amber-700 to-amber-900 text-amber-100 p-3 flex justify-between items-center border-b-4 border-amber-950 shadow-md z-10">
+            <div class="flex items-center gap-2">
+                <span class="bg-amber-950 p-2 rounded-xl border border-amber-600 text-amber-300 text-sm md:text-base font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-compass text-amber-400"></i>
+                    <span id="header-title">Pengembaraan Kata Seru</span>
+                </span>
+            </div>
+            
+            <div id="student-badge" class="hidden flex items-center gap-2 bg-amber-950/80 px-3 py-1 rounded-xl border border-amber-600/50">
+                <i class="fa-solid fa-user-ninja text-amber-300 text-base"></i>
+                <div class="text-xs md:text-sm">
+                    <span id="badge-name" class="font-bold text-amber-200 block leading-tight">Murid</span>
+                    <span id="badge-class" class="text-amber-400 text-[10px] md:text-xs">Kelas</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="toggleAudio()" id="sound-btn" title="Kawal Bunyi" class="w-10 h-10 bg-amber-800 hover:bg-amber-700 rounded-xl border border-amber-500 flex items-center justify-center text-amber-200 transition">
+                    <i class="fa-solid fa-volume-high text-lg" id="sound-icon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dynamic Game Screens Container -->
+        <main class="flex-1 p-3 md:p-5 flex flex-col justify-center items-center relative overflow-y-auto">
+
+            <section id="screen-cover" class="w-full flex flex-col items-center text-center py-1 animate-fade-in">
+                <!-- Banner Title & Cover Poster -->
+                <div class="relative w-full mb-3 rounded-2xl overflow-hidden border-4 border-amber-800 shadow-xl bg-amber-950 min-h-[160px] flex items-center justify-center">
+                    <img src="image_9.png" alt="Pengembaraan Bahasa Melayu SK Morni Pok" class="w-full h-auto object-cover max-h-[300px] md:max-h-[360px] rounded-xl" 
+                         onerror="this.onerror=null; this.src='https://placehold.co/600x300/422506/fef08a?text=Pengembaraan+Kata+Seru+Tahun+1';">
+                </div>
+
+                <!-- Interactive Animals Sound Buttons -->
+                <div class="w-full bg-emerald-900/80 border-2 border-emerald-600 rounded-2xl p-3 mb-3 flex justify-around items-center gap-2 shadow-inner">
+                    <!-- Tiger Sound Button -->
+                    <button onclick="playTigerRoar()" class="group flex flex-col items-center bg-amber-950/80 p-2 md:p-3 rounded-xl border-2 border-amber-600 hover:border-yellow-400 transition transform hover:scale-105 active:scale-95">
+                        <div class="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-amber-500/20 rounded-full border border-amber-400/40 mb-1">
+                            <span class="text-3xl md:text-4xl group-hover:animate-bounce">🐅</span>
+                        </div>
+                        <span class="text-yellow-300 text-[11px] md:text-xs font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-volume-low"></i> Harimau
+                        </span>
+                    </button>
+
+                    <!-- Explorer Character Icon -->
+                    <div class="flex flex-col items-center">
+                        <span class="text-4xl md:text-5xl pulse-subtle">🤠</span>
+                        <span class="text-amber-200 text-xs font-bold mt-1">Pengembara</span>
+                    </div>
+
+                    <!-- Dinosaur Sound Button -->
+                    <button onclick="playDinoRoar()" class="group flex flex-col items-center bg-emerald-950/80 p-2 md:p-3 rounded-xl border-2 border-emerald-500 hover:border-green-300 transition transform hover:scale-105 active:scale-95">
+                        <div class="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-emerald-500/20 rounded-full border border-emerald-400/40 mb-1">
+                            <span class="text-3xl md:text-4xl group-hover:animate-bounce">🦖</span>
+                        </div>
+                        <span class="text-emerald-300 text-[11px] md:text-xs font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-volume-low"></i> Dinosaur
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Student Registration Form -->
+                <div class="wood-panel w-full p-4 md:p-5">
+                    <h2 class="text-amber-950 font-bold text-base md:text-lg mb-3 flex items-center justify-center gap-2 bg-amber-200/90 py-1.5 rounded-lg border border-amber-700">
+                        <i class="fa-solid fa-id-card"></i> Isi Maklumat Murid
+                    </h2>
+                    
+                    <form onsubmit="startAdventure(event)" class="space-y-3">
+                        <div class="text-left">
+                            <label for="input-name" class="block text-amber-950 font-bold text-sm mb-1">Nama Murid:</label>
+                            <input type="text" id="input-name" required placeholder="Contoh: Amirul Bin Azman" 
+                                   class="w-full px-4 py-2.5 rounded-xl border-2 border-amber-800 bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold text-slate-800">
+                        </div>
+
+                        <div class="text-left">
+                            <label for="input-class" class="block text-amber-950 font-bold text-sm mb-1">Kelas:</label>
+                            <input type="text" id="input-class" required placeholder="Contoh: 1 Ibnu Sina" 
+                                   class="w-full px-4 py-2.5 rounded-xl border-2 border-amber-800 bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold text-slate-800">
+                        </div>
+
+                        <button type="submit" class="wood-btn w-full py-3.5 mt-2 rounded-xl text-white font-extrabold text-base md:text-lg tracking-wider flex items-center justify-center gap-2">
+                            <span>MULA PENGEMBARAAN</span>
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="screen-map" class="w-full hidden flex-col items-center animate-fade-in">
+                <!-- Map Header Poster Image -->
+                <div class="relative w-full mb-3 rounded-2xl overflow-hidden border-4 border-amber-800 shadow-xl bg-amber-950 min-h-[140px] flex items-center justify-center">
+                    <img src="image_10.png" alt="Peta Pengembaraan Kata Seru" class="w-full h-auto object-cover max-h-[260px] md:max-h-[320px] rounded-xl"
+                         onerror="this.onerror=null; this.src='https://placehold.co/600x250/3d240d/fef08a?text=Peta+Pengembaraan+Kata+Seru';">
+                </div>
+
+                <!-- Adventure Map Visual -->
+                <div class="relative w-full bg-emerald-900/90 rounded-2xl border-4 border-amber-800 p-4 min-h-[360px] flex flex-col justify-between items-center overflow-hidden">
+                    <div class="w-full space-y-2.5 z-10">
+                        <!-- Level 5 -->
+                        <div id="map-level-5" class="flex items-center justify-between bg-amber-950/60 p-2.5 rounded-xl border-2 border-amber-600/60 opacity-60">
+                            <div class="flex items-center gap-3">
+                                <span class="w-9 h-9 rounded-full bg-amber-800 text-white font-bold flex items-center justify-center border-2 border-amber-500 text-sm">5</span>
+                                <div>
+                                    <div class="text-amber-200 font-bold text-xs md:text-sm">Peringkat 5: Soalan 4</div>
+                                    <div class="text-amber-400/80 text-[11px]">Makan Banyak</div>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-lock text-amber-400 text-base"></i>
+                        </div>
+
+                        <!-- Level 4 -->
+                        <div id="map-level-4" class="flex items-center justify-between bg-amber-950/60 p-2.5 rounded-xl border-2 border-amber-600/60 opacity-60">
+                            <div class="flex items-center gap-3">
+                                <span class="w-9 h-9 rounded-full bg-amber-800 text-white font-bold flex items-center justify-center border-2 border-amber-500 text-sm">4</span>
+                                <div>
+                                    <div class="text-amber-200 font-bold text-xs md:text-sm">Peringkat 4: Soalan 3</div>
+                                    <div class="text-amber-400/80 text-[11px]">Kucing Koyak Buku</div>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-lock text-amber-400 text-base"></i>
+                        </div>
+
+                        <!-- Level 3 -->
+                        <div id="map-level-3" class="flex items-center justify-between bg-amber-950/60 p-2.5 rounded-xl border-2 border-amber-600/60 opacity-60">
+                            <div class="flex items-center gap-3">
+                                <span class="w-9 h-9 rounded-full bg-amber-800 text-white font-bold flex items-center justify-center border-2 border-amber-500 text-sm">3</span>
+                                <div>
+                                    <div class="text-amber-200 font-bold text-xs md:text-sm">Peringkat 3: Soalan 2</div>
+                                    <div class="text-amber-400/80 text-[11px]">Rumah Besar</div>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-lock text-amber-400 text-base"></i>
+                        </div>
+
+                        <!-- Level 2 -->
+                        <div id="map-level-2" class="flex items-center justify-between bg-amber-950/60 p-2.5 rounded-xl border-2 border-amber-600/60 opacity-60">
+                            <div class="flex items-center gap-3">
+                                <span class="w-9 h-9 rounded-full bg-amber-800 text-white font-bold flex items-center justify-center border-2 border-amber-500 text-sm">2</span>
+                                <div>
+                                    <div class="text-amber-200 font-bold text-xs md:text-sm">Peringkat 2: Soalan 1</div>
+                                    <div class="text-amber-400/80 text-[11px]">Lutut Sakit</div>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-lock text-amber-400 text-base"></i>
+                        </div>
+
+                        <!-- Level 1 (Start) -->
+                        <div id="map-level-1" class="flex items-center justify-between bg-amber-500/30 p-2.5 rounded-xl border-2 border-yellow-400 shadow-lg">
+                            <div class="flex items-center gap-3">
+                                <span class="w-9 h-9 rounded-full bg-yellow-500 text-amber-950 font-extrabold flex items-center justify-center border-2 border-white text-sm animate-bounce">1</span>
+                                <div>
+                                    <div class="text-yellow-300 font-bold text-xs md:text-sm">Peringkat 1: Pilih 4 Kata Seru</div>
+                                    <div class="text-amber-100 text-[11px]">Pilih kata seru yang betul</div>
+                                </div>
+                            </div>
+                            <span class="bg-yellow-400 text-amber-950 text-[10px] md:text-xs font-extrabold px-2.5 py-1 rounded-full animate-pulse">BERMULA!</span>
+                        </div>
+                    </div>
+
+                    <button onclick="goToLevel(1)" class="wood-btn w-full py-3 mt-3 rounded-xl text-white font-bold text-base md:text-lg tracking-wide flex items-center justify-center gap-2">
+                        <span>MASUK PERINGKAT 1</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </section>
+
+            <section id="screen-level-1" class="w-full hidden flex-col items-center animate-fade-in">
+                <!-- Level 1 Poster Banner Image -->
+                <div class="relative w-full mb-3 rounded-2xl overflow-hidden border-4 border-amber-800 shadow-xl bg-amber-950 min-h-[140px] flex items-center justify-center">
+                    <img src="image_11.png" alt="Peringkat 1 Kata Seru" class="w-full h-auto object-cover max-h-[250px] md:max-h-[300px] rounded-xl"
+                         onerror="this.onerror=null; this.src='https://placehold.co/600x250/3d240d/fef08a?text=Pilih+4+Kata+Seru+Yang+Betul';">
+                </div>
+
+                <!-- Instruction Banner -->
+                <div class="bg-amber-100 text-amber-950 font-bold text-sm text-center p-2 rounded-xl border-2 border-amber-700 w-full mb-3 shadow">
+                     Pilih 4 perkataan yang merupakan <span class="text-amber-800 underline font-black">Kata Seru</span>:
+                </div>
+
+                <!-- Word Selection Board -->
+                <div class="wood-panel-inner w-full p-3 md:p-4 mb-3 border-4 border-amber-800">
+                    <div class="grid grid-cols-2 gap-3" id="words-grid">
+                        <!-- Dynamic Word Buttons -->
+                    </div>
+                </div>
+
+                <!-- Feedback Message Container -->
+                <div id="lvl1-feedback" class="min-h-[2rem] mb-2 font-bold text-sm text-center text-yellow-300"></div>
+
+                <!-- Submit Answer Button -->
+                <button id="lvl1-submit-btn" onclick="checkLevel1()" class="wood-btn w-full py-3 rounded-xl text-white font-bold text-base md:text-lg opacity-80 cursor-not-allowed" disabled>
+                    SEMAK JAWAPAN (0/4)
+                </button>
+            </section>
+
+            <section id="screen-quiz" class="w-full hidden flex-col items-center animate-fade-in">
+                <!-- Question Header Bar -->
+                <div class="wood-panel w-full p-2.5 mb-3 flex justify-between items-center">
+                    <div class="text-left">
+                        <span id="quiz-level-tag" class="bg-amber-950 text-yellow-300 text-xs font-bold px-2.5 py-0.5 rounded-full border border-amber-600">PERINGKAT 2</span>
+                        <h3 class="text-amber-950 font-bold text-sm md:text-base">Soalan Kata Seru</h3>
+                    </div>
+                    <div class="bg-amber-200/90 text-amber-950 font-extrabold text-xs px-2.5 py-1 rounded-lg border border-amber-700">
+                        Pilih jawapan yang betul! 😊
+                    </div>
+                </div>
+
+                <!-- Image Illustration Box -->
+                <div class="w-full bg-amber-100 rounded-2xl border-4 border-amber-800 p-2 md:p-3 mb-3 flex flex-col items-center shadow-lg relative min-h-[220px] justify-center">
+                    <div id="quiz-illustration" class="w-full flex justify-center items-center py-1">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Sentence Prompt Box -->
+                    <div class="wood-panel-inner w-full p-3 text-center border-2 border-amber-700 mt-2">
+                        <p class="text-amber-950 font-extrabold text-lg md:text-xl font-mali tracking-wide" id="quiz-sentence">
+                            "_______, lutut saya sakit!"
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Answer Options Buttons -->
+                <div class="grid grid-cols-2 gap-3 md:gap-4 w-full mt-1" id="quiz-options-container">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <section id="screen-victory" class="w-full hidden flex-col items-center text-center animate-fade-in py-1">
+                <!-- Victory Screen Banner Image -->
+                <div class="relative w-full mb-3 rounded-2xl overflow-hidden border-4 border-amber-800 shadow-xl bg-amber-950 min-h-[160px] flex items-center justify-center">
+                    <img src="image_16.png" alt="Tahniah Sijil Pengembara Cilik" class="w-full h-auto object-cover max-h-[260px] md:max-h-[320px] rounded-xl"
+                         onerror="this.onerror=null; this.src='https://placehold.co/600x260/3d240d/fef08a?text=Tahniah!+Sijil+Pengembara+Cilik';">
+                </div>
+
+                <!-- Certificate Summary Card -->
+                <div class="wood-panel-inner w-full p-4 mb-4 border-4 border-amber-700 text-amber-950 text-center">
+                    <h3 class="font-extrabold text-base md:text-lg border-b-2 border-amber-800/30 pb-1 mb-2">SIJIL PENGEMBARA CILIK</h3>
+                    <p class="text-xs md:text-sm font-semibold">Tahniah diucapkan kepada:</p>
+                    <p id="winner-name" class="text-xl md:text-2xl font-black text-amber-900 my-1 font-mali">Nama Murid</p>
+                    <p id="winner-class" class="text-xs font-bold text-amber-800 mb-2">Kelas: -</p>
+
+                    <div class="flex justify-center gap-1.5 text-yellow-500 text-xl mb-2">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="text-xs text-amber-900 font-bold">Anda telah menguasai Kata Seru Tahun 1!</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-3 w-full">
+                    <button onclick="playVictorySound()" class="bg-amber-700 hover:bg-amber-600 text-amber-100 font-bold py-3 px-3 rounded-xl border-2 border-amber-900 flex-1 flex items-center justify-center gap-2 text-xs md:text-sm">
+                        <i class="fa-solid fa-music"></i> Bunyi Kemenangan
+                    </button>
+                    <button onclick="restartGame()" class="wood-btn py-3 px-3 rounded-xl text-white font-extrabold flex-1 flex items-center justify-center gap-2 text-sm md:text-base">
+                        <i class="fa-solid fa-rotate-right"></i> MAIN LAGI
+                    </button>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer Bar -->
+        <footer class="bg-amber-950/80 text-amber-300/80 text-[11px] text-center py-1.5 border-t border-amber-800/60">
+            Bahasa Melayu Tahun 1 • Kata Seru Interaktif
+        </footer>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let studentData = { name: '', class: '' };
+        let currentLevel = 1;
+        let selectedLvl1Words = [];
+        let soundEnabled = true;
+
+        // Web Audio API Synthesizer (Zero external audio dependency)
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-lg';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-lg';
+            }
+        }
+
+        // 🐅 Tiger Roar Audio Synthesizer
+        function playTigerRoar() {
+            if (!soundEnabled) return;
+            initAudio();
+
+            const duration = 1.2;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const filter = audioCtx.createBiquadFilter();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(110, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(45, audioCtx.currentTime + duration);
+
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(300, audioCtx.currentTime);
+            filter.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 0.3);
+            filter.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + duration);
+
+            gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 0.2);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        // 🦖 Dinosaur Roar Audio Synthesizer
+        function playDinoRoar() {
+            if (!soundEnabled) return;
+            initAudio();
+
+            const duration = 1.6;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const filter = audioCtx.createBiquadFilter();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(160, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + duration);
+
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(200, audioCtx.currentTime);
+            filter.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.4);
+            filter.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + duration);
+
+            gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.3);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        // Correct Answer Synthesizer
+        function playCorrectSound() {
+            if (!soundEnabled) return;
+            initAudio();
+
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            notes.forEach((freq, idx) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+
+                const startTime = audioCtx.currentTime + (idx * 0.08);
+                gain.gain.setValueAtTime(0.15, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.25);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(startTime);
+                osc.stop(startTime + 0.25);
+            });
+        }
+
+        // Wrong Answer Synthesizer
+        function playWrongSound() {
+            if (!soundEnabled) return;
+            initAudio();
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+            osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.3);
+
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        // 🎺 Victory Fanfare Synthesizer
+        function playVictorySound() {
+            if (!soundEnabled) return;
+            initAudio();
+
+            const melody = [
+                { f: 523.25, d: 0.15, t: 0 },
+                { f: 659.25, d: 0.15, t: 0.15 },
+                { f: 783.99, d: 0.15, t: 0.30 },
+                { f: 1046.50, d: 0.5, t: 0.45 }
+            ];
+
+            melody.forEach(note => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.value = note.f;
+
+                const start = audioCtx.currentTime + note.t;
+                gain.gain.setValueAtTime(0.2, start);
+                gain.gain.exponentialRampToValueAtTime(0.001, start + note.d);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(start);
+                osc.stop(start + note.d);
+            });
+        }
+
+        function showScreen(screenId) {
+            const screens = ['screen-cover', 'screen-map', 'screen-level-1', 'screen-quiz', 'screen-victory'];
+            screens.forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function startAdventure(event) {
+            event.preventDefault();
+            initAudio();
+
+            studentData.name = document.getElementById('input-name').value.trim();
+            studentData.class = document.getElementById('input-class').value.trim();
+
+            if (!studentData.name || !studentData.class) return;
+
+            document.getElementById('badge-name').innerText = studentData.name;
+            document.getElementById('badge-class').innerText = studentData.class;
+            document.getElementById('student-badge').classList.remove('hidden');
+
+            showScreen('screen-map');
+        }
+
+        function goToLevel(levelNum) {
+            currentLevel = levelNum;
+            if (levelNum === 1) {
+                setupLevel1();
+                showScreen('screen-level-1');
+            } else if (levelNum >= 2 && levelNum <= 5) {
+                setupQuizQuestion(levelNum);
+                showScreen('screen-quiz');
+            } else if (levelNum === 6) {
+                setupVictoryScreen();
+                showScreen('screen-victory');
+            }
+        }
+
+        const level1WordsList = [
+            { id: 'w1', word: 'amboi', isKataSeru: true },
+            { id: 'w2', word: 'wah', isKataSeru: true },
+            { id: 'w3', word: 'makan', isKataSeru: false },
+            { id: 'w4', word: 'minum', isKataSeru: false },
+            { id: 'w5', word: 'aduh', isKataSeru: true },
+            { id: 'w6', word: 'cis', isKataSeru: true },
+            { id: 'w7', word: 'duduk', isKataSeru: false }
+        ];
+
+        function setupLevel1() {
+            selectedLvl1Words = [];
+            const grid = document.getElementById('words-grid');
+            grid.innerHTML = '';
+
+            level1WordsList.forEach(item => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'wood-btn text-white font-extrabold text-xl md:text-2xl py-3 rounded-xl transition font-mali';
+                btn.innerText = item.word;
+                btn.id = `btn-word-${item.id}`;
+                btn.onclick = () => toggleWordSelection(item);
+                grid.appendChild(btn);
+            });
+
+            updateLvl1Button();
+            document.getElementById('lvl1-feedback').innerText = '';
+        }
+
+        function toggleWordSelection(item) {
+            initAudio();
+            const index = selectedLvl1Words.findIndex(w => w.id === item.id);
+            const btn = document.getElementById(`btn-word-${item.id}`);
+
+            if (index > -1) {
+                selectedLvl1Words.splice(index, 1);
+                btn.classList.remove('wood-btn-selected');
+            } else {
+                if (selectedLvl1Words.length < 4) {
+                    selectedLvl1Words.push(item);
+                    btn.classList.add('wood-btn-selected');
+                }
+            }
+
+            updateLvl1Button();
+        }
+
+        function updateLvl1Button() {
+            const submitBtn = document.getElementById('lvl1-submit-btn');
+            const count = selectedLvl1Words.length;
+            submitBtn.innerText = `SEMAK JAWAPAN (${count}/4)`;
+
+            if (count === 4) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+                submitBtn.classList.add('pulse-subtle');
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+                submitBtn.classList.remove('pulse-subtle');
+            }
+        }
+
+        function checkLevel1() {
+            const correctCount = selectedLvl1Words.filter(w => w.isKataSeru).length;
+            const feedback = document.getElementById('lvl1-feedback');
+
+            if (correctCount === 4) {
+                playCorrectSound();
+                feedback.className = 'min-h-[2rem] mb-2 font-bold text-sm text-center text-green-300';
+                feedback.innerText = 'Syabas! Semua 4 Kata Seru betul! 🎉';
+
+                setTimeout(() => {
+                    goToLevel(2);
+                }, 1200);
+            } else {
+                playWrongSound();
+                feedback.className = 'min-h-[2rem] mb-2 font-bold text-sm text-center text-red-300';
+                feedback.innerText = 'Ada jawapan yang kurang tepat. Cuba lagi! (Petua: Cari amboi, wah, aduh, cis)';
+            }
+        }
+
+        const quizQuestions = {
+            2: {
+                levelTitle: 'PERINGKAT 2',
+                sentence: '________, lutut saya sakit!',
+                options: ['Wah', 'Aduh'],
+                answer: 'Aduh',
+                imgSrc: 'image_12.png',
+                fallbackText: 'Peringkat 2: Lutut Sakit'
+            },
+            3: {
+                levelTitle: 'PERINGKAT 3',
+                sentence: '________, rumah ini sungguh besar!',
+                options: ['Wah', 'Aduh'],
+                answer: 'Wah',
+                imgSrc: 'image_13.png',
+                fallbackText: 'Peringkat 3: Rumah Besar'
+            },
+            4: {
+                levelTitle: 'PERINGKAT 4',
+                sentence: '________, Si Tompok koyak buku saya!',
+                options: ['Cis', 'Wah'],
+                answer: 'Cis',
+                imgSrc: 'image_14.png',
+                fallbackText: 'Peringkat 4: Kucing Koyak Buku'
+            },
+            5: {
+                levelTitle: 'PERINGKAT 5',
+                sentence: '________, banyak sungguh makanan yang kamu makan!',
+                options: ['Aduh', 'Amboi'],
+                answer: 'Amboi',
+                imgSrc: 'image_15.png',
+                fallbackText: 'Peringkat 5: Makan Banyak'
+            }
+        };
+
+        function setupQuizQuestion(levelNum) {
+            const q = quizQuestions[levelNum];
+            document.getElementById('quiz-level-tag').innerText = q.levelTitle;
+            document.getElementById('quiz-sentence').innerText = q.sentence;
+
+            const illustrationBox = document.getElementById('quiz-illustration');
+            illustrationBox.innerHTML = `
+                <img src="${q.imgSrc}" alt="${q.fallbackText}" class="w-full max-h-[220px] md:max-h-[260px] object-contain rounded-xl border-2 border-amber-700 shadow-md"
+                     onerror="this.onerror=null; this.src='https://placehold.co/500x220/422506/fef08a?text=${encodeURIComponent(q.fallbackText)}';">
+            `;
+
+            const container = document.getElementById('quiz-options-container');
+            container.innerHTML = '';
+
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'wood-btn text-white font-black text-2xl md:text-3xl py-4 rounded-2xl transition font-mali tracking-wider flex items-center justify-center';
+                btn.innerText = opt;
+                btn.onclick = () => handleAnswerChoice(opt, q.answer, levelNum);
+                container.appendChild(btn);
+            });
+        }
+
+        function handleAnswerChoice(chosen, correct, levelNum) {
+            initAudio();
+            const app = document.getElementById('app');
+
+            if (chosen === correct) {
+                playCorrectSound();
+
+                app.classList.add('ring-8', 'ring-green-400');
+                setTimeout(() => app.classList.remove('ring-8', 'ring-green-400'), 600);
+
+                setTimeout(() => {
+                    if (levelNum < 5) {
+                        goToLevel(levelNum + 1);
+                    } else {
+                        goToLevel(6); // Final Victory Screen
+                    }
+                }, 800);
+            } else {
+                playWrongSound();
+
+                app.classList.add('ring-8', 'ring-red-500');
+                setTimeout(() => app.classList.remove('ring-8', 'ring-red-500'), 600);
+            }
+        }
+
+        function setupVictoryScreen() {
+            document.getElementById('winner-name').innerText = studentData.name || 'Murid Cemerlang';
+            document.getElementById('winner-class').innerText = `Kelas: ${studentData.class || '-'}`;
+
+            playVictorySound();
+
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 120,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+
+        function restartGame() {
+            showScreen('screen-cover');
+        }
+    </script>
+</body>
+</html>
+
+```
